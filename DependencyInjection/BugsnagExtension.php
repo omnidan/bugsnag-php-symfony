@@ -33,6 +33,16 @@ class BugsnagExtension extends Extension
         {
         	$container->setParameter('bugsnag.notify_stages', array('production'));
         }
+
+        // Set metadata from configuration
+        if (is_array($config['metadata']))
+        {
+        	$container->setParameter('bugsnag.metadata', $config['metadata']);
+        }
+        else
+        {
+        	$container->setParameter('bugsnag.metadata', array());
+        }
     }
 
     /**

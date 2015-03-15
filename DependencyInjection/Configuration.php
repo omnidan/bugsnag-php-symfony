@@ -24,9 +24,11 @@ class Configuration implements ConfigurationInterface
         	->fixXmlConfig('notify_stage')
             ->children()
             	->scalarNode('api_key')->end()
-                ->arrayNode('notify_stages')
-                	->prototype('scalar')->end()
-                ->end()
+              ->arrayNode('notify_stages')
+                ->prototype('scalar')->end()
+              ->end()
+              ->variableNode('metadata')
+              ->end()
             ->end();
 
         return $treeBuilder;

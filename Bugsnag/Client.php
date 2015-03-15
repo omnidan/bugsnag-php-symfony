@@ -28,7 +28,6 @@ class Client
         }
 
         $this->enabled = true;
-        $request = $container->get('request');
         $releaseStage = ($envName == 'prod') ? 'production' : $envName;
 
         // Register bugsnag
@@ -36,20 +35,34 @@ class Client
         $this->bugsnag->setReleaseStage($releaseStage);
         $this->bugsnag->setNotifyReleaseStages($container->getParameter('bugsnag.notify_stages'));
         $this->bugsnag->setProjectRoot(realpath($container->getParameter('kernel.root_dir').'/..'));
-        $this->bugsnag->setBeforeNotifyFunction(function($error) use ($request) {
+        $this->bugsnag->setBeforeNotifyFunction(function($error) use ($container) {
+            // Get request if available
+            $request = null;
+            try {
+              $request = $container->get('request');
+            } catch (\Symfony\Component\DependencyInjection\Exception\InactiveScopeException $e) {}
+
             // Set up result array
-            $metaData = array(
-                'Symfony' => array()
-            );
+            $metaData_symfony = null;
 
             // Get and add controller information, if available
-            $controller = $request->attributes->get('_controller');
-            if ($controller !== null)
-            {
-                $metaData['Symfony'] = array('Controller' => $controller);
+            if (!is_null($request)) {
+              $controller = $request->attributes->get('_controller');
+              if ($controller !== null)
+              {
+                  $metaData_symfony = array('Controller' => $controller);
+              }
             }
 
+            // Get custom metadata
+            $metaData = $container->getParameter('bugsnag.metadata');
+            if (!is_array($metaData)) $metaData = array();
+
+            // Merge metadata together
+            if (!is_null($metaData_symfony)) $metaData['Symfony'] = $metaData_symfony;
+
             // Return our metadata to be included in the error message
+            $error->setMetaData($metaData);
             return $metaData;
         });
     }
@@ -61,10 +74,10 @@ class Client
     	}
     }
 
-    public function notifyOnError($message, Array $metadata = null)
+    public function notifyOnError($message)
     {
     	if ($this->enabled) {
-    		$this->bugsnag->notifyError('Error', $message, $metadata);
+    		$this->bugsnag->notifyError('Error', $message);
     	}
     }
 }
