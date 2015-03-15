@@ -35,9 +35,15 @@ public function registerBundles()
 bugsnag:
     api_key: your_api_key
     notify_stages: [ production ]
+    metadata:
+      server:
+        name: servername
 ```
 
-The `notify_stages` setting is optional. Default value is `production`.
+The `notify_stages` and `metadata` settings are optional. Default value for `notify_stages` is `production`.
+
+You can set `metadata` to anything you want and it will be sent to bugsnag like that.
+If you want to create a new tab, you'll have to do it like in the example (which creates a new tab called `SERVER` with an attribute `name`).
 
 ### Step 4 (optional): Reporting errors from custom commands
 
@@ -88,7 +94,7 @@ Do make sure you are using `--env=prod` when executing commands on your server. 
 This bundle is under the MIT license. See the complete license in the bundle:
 
     Resources/meta/LICENSE
-    
+
 ## About
 
 See also the list of [contributors](https://github.com/Wrep/bugsnag-php-symfony/contributors).
